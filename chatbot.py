@@ -9,23 +9,19 @@ import redis
 import json
 import logging
 import configparser
-
+from ChatGPT_HKBU import HKBU_ChatGPT
 
 global redis1
-# redis1 = redis.Redis(host=(os.environ['HOST']), 
-#                          password=(os.environ['REDIS_PASSWORD']), 
-#                          port=(os.environ['REDISPORT']))
 config = configparser.ConfigParser()
 config.read('config.ini')
 redis1 = redis.Redis(host=(config['REDIS']['HOST']), 
                          password=(config['REDIS']['PASSWORD']), 
                          port=(config['REDIS']['REDISPORT']))
 
-# updater = Updater(token=(config['TELEGRAM']['ACCESS_TOKEN']), use_context=True)
+
 
 HIKING_OPTIONS, HIKING_READ, HIKING_WRITE, HIKING_READ_PHOTO  = range(4)
 TVSHOW_READ_PHOTO, TVSHOW_WRITE_PROMPT, TVSHOW_WRITE, TVSHOW_END  = range(4)
-# COOKING_OPTIONS, COOKING_READ, COOKING_WRITE, COOKING_READ_VIDEO  = range(4)
 
 
 def get_read_write_option(read_text, write_text, read, write):
@@ -41,56 +37,6 @@ def get_read_write_option(read_text, write_text, read, write):
     )
     return reply_keyboard_markup
 
-# def cooking_entrance(update, context):
-#     read_text = "Read cooking video"
-#     write_text = "Share cooking video"
-#     reply_markup = get_read_write_option(read_text, write_text, str(COOKING_READ), str(COOKING_WRITE))
-#     update.message.reply_text("Choose an option:", reply_markup=reply_markup)
-#     return COOKING_OPTIONS
-
-    
-# def cooking_read(update, context):
-#     global randomCookVideos
-#     randomCookVideos = get_cooking_video_information()
-#     btnOptions = []
-#     for index, cookVideo in enumerate(randomCookVideos):
-#         btnOptions.append([InlineKeyboardButton(
-#                 text=cookVideo['title'], callback_data=index)])
-#     btnOptions.append( [InlineKeyboardButton(
-#                 text="Give me other cooking videos", callback_data=len(randomCookVideos))])
-#     reply_keyboard_markup = InlineKeyboardMarkup(btnOptions)
-#     context.bot.send_message(chat_id=update.effective_chat.id, text="Please select the video", reply_markup=reply_keyboard_markup)
-#     return COOKING_READ_VIDEO
-
-def tvshow_read(update, context):
-    global randomShows
-    randomShows = get_tv_information()
-    # print(randomShows)
-    btnOptions = []
-    for show in randomShows:
-        btnOptions.append( [InlineKeyboardButton(
-                text=show['title'], callback_data=show['link'])])
-    btnOptions.append( [InlineKeyboardButton(
-                text="Give me other tv shows", callback_data=0)])
-    reply_keyboard_markup = InlineKeyboardMarkup(btnOptions)
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Please select the TV Show", reply_markup=reply_keyboard_markup)
-    # context.bot.send_message(chat_id=update.effective_chat.id, text=userSelectedTexts[1])
-    return TVSHOW_READ_PHOTO
- 
-
-
-# def cooking_video(update, context):
-#     query = update.callback_query
-#     global randomCookVideos
-#     try:
-#         selectedVideo = randomCookVideos[int(query.data)]
-#         context.bot.send_message(chat_id=update.effective_chat.id, 
-#                                      parse_mode='HTML',
-#                                      text=selectedVideo['link'])
-#         context.bot.send_message(chat_id=update.effective_chat.id, text='Click /start to try again')
-#         return ConversationHandler.END
-#     except:
-#         return cooking_read(update, context)
 
 def tvshow_photo(update, context):
     query = update.callback_query
@@ -189,32 +135,20 @@ def hiking_entrance(update, context):
     update.message.reply_text("Choose an option:", reply_markup=reply_markup)
     return HIKING_OPTIONS
 
-# def cooking_write(update, context):
-#     message = update.message
-#     if message.video is not None:
-#         video_id = update.message.video.file_id
-#         cooking_data = {
-#             "video_id" : video_id,
-#             "caption": message.caption,
-#             "id" : message.chat.id,
-#         }
-#         redis1.lpush("cooking", json.dumps(cooking_data))
-#         update.message.reply_text("Thank you for your share, Click /start to try again")
-#         return ConversationHandler.END
-#     elif message.text is not None:
-#         parsed_url = urlparse(message.text)
-#         if parsed_url.scheme and parsed_url.netloc:
-#             cooking_data = {
-#                 "link" : message.text,
-#                 "id" : message.chat.id,
-#             }
-#             redis1.lpush("cooking", json.dumps(cooking_data))
-#             update.message.reply_text("Thank you for your share, Click /start to try again")
-#             return ConversationHandler.END
-#         else:
-#             update.message.reply_text("Cooking link is not vaild, please input again!")
-#     else:
-#         update.message.reply_text("Cooking link is missing, please input again!")
+def tvshow_read(update, context):
+    global randomShows
+    randomShows = get_tv_information()
+    # print(randomShows)
+    btnOptions = []
+    for show in randomShows:
+        btnOptions.append( [InlineKeyboardButton(
+                text=show['title'], callback_data=show['link'])])
+    btnOptions.append( [InlineKeyboardButton(
+                text="Give me other tv shows", callback_data=0)])
+    reply_keyboard_markup = InlineKeyboardMarkup(btnOptions)
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Please select the TV Show", reply_markup=reply_keyboard_markup)
+    # context.bot.send_message(chat_id=update.effective_chat.id, text=userSelectedTexts[1])
+    return TVSHOW_READ_PHOTO
 
 def tvshow_write(update, context):
     message = update.message
@@ -242,18 +176,6 @@ def tvshow_write(update, context):
         update.message.reply_text("Your review is missing, please input again!")
    
 
-
-# def cooking_options(update, context):
-#     query = update.callback_query
-#     if query.data == str(COOKING_READ):
-#         return cooking_read(update, context)
-#     elif query.data == str(COOKING_WRITE):
-#         message = "Please upload cooking video or share the cooking video link"
-#         context.bot.send_message(chat_id=update.effective_chat.id,  text=message)
-#         return int(query.data)
-    
-
-
 def cancel(update, context):
     print('cancel invoke')
     ConversationHandler.END
@@ -273,46 +195,52 @@ def tv_show_conv_handler():
     )
     return conv_handler
 
-# def cook_conv_handler():
-#     conv_handler = ConversationHandler(
-#     entry_points=[CommandHandler('cooking', cooking_entrance)],
-#     states={
-#         COOKING_OPTIONS: [CallbackQueryHandler(cooking_options)],
-#         COOKING_READ: [MessageHandler(Filters.text, cooking_read)],
-#         COOKING_WRITE: [MessageHandler(Filters.all, cooking_write)],
-#         COOKING_READ_VIDEO: [CallbackQueryHandler(cooking_video)]
-#     },
-#     fallbacks=[CommandHandler('cancel', cancel)]
-#     )
-#     return conv_handler
 
-def welcome(update, context):
-    welcome_message = '''Hello and welcome, {}.
-I'm your leisure activity chatbot assistant and provide you 3 functions.
-send /hiking to check or share hiking route and photos
-send /tvshow to read or write review to TV show in Neflex
-send /cooking to view or share the cooking video from youtube'''.format(
+def welcome(update: Update, context: CallbackContext):
+    welcome_message = '''Welcome,my friend, {}.
+send /hiking to check or share hiking route and photos.
+send /tvshow to read a TV show and write a review.
+'''.format(
         update.message.from_user.first_name)
     context.bot.send_message(chat_id=update.effective_chat.id,
                              text=welcome_message)
-    return ConversationHandler.END
+    #return ConversationHandler.END
 
 def error_handler(update, context):
     logging.warning('Update "%s" caused error "%s"', update, context.error)
     context.bot.send_message(chat_id=update.message.chat_id, text="Sorry, an error occurred.")
 
+def equiped_chatgpt(update, context):
+    global chatgpt
+    reply_message = chatgpt.submit(update.message.text)
+    logging.info("Update: " + str(update))
+    logging.info("context: " + str(context))
+    context.bot.send_message(chat_id=update.effective_chat.id, text=reply_message)
+
+def help_command(update: Update, context: CallbackContext) -> None:
+    """Send a message when the command /help is issued."""
+    update.message.reply_text('If you want to use other function,send /welcome to explore.')
 
 def main() -> None:
+    config = configparser.ConfigParser()
+    config.read('config.ini')
     updater = Updater(token=(config['TELEGRAM']['ACCESS_TOKEN']), use_context=True)
     # updater = Updater(token=(os.environ['ACCESS_TOKEN']), use_context=True)
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
     dispatcher = updater.dispatcher
-    default_handler = MessageHandler(Filters.all, welcome)
+    #default_handler = MessageHandler(Filters.all, welcome)
+    
+    global chatgpt
+    chatgpt = HKBU_ChatGPT(config)
+    chatgpt_handler = MessageHandler(Filters.text & (~Filters.command),equiped_chatgpt)
+    dispatcher.add_handler(chatgpt_handler)
+    default_handler = MessageHandler(Filters.command, welcome)
+    dispatcher.add_handler(CommandHandler("welcome", welcome))
+    dispatcher.add_handler(CommandHandler("help", help_command))
     dispatcher.add_handler(hiking_conv_handler())
     dispatcher.add_handler(tv_show_conv_handler())
-    # dispatcher.add_handler(cook_conv_handler())
     dispatcher.add_handler(default_handler)
-    dispatcher.add_error_handler(error_handler)
+    # dispatcher.add_error_handler(error_handler)
     updater.start_polling()
     updater.idle()
 
