@@ -1,0 +1,18 @@
+name: Render Deploy
+on:
+  push:
+    branches:
+      - master # change to main if needed
+jobs:
+  deploy:
+    name: Deploy app
+    runs-on: ubuntu-latest
+    concurrency: deploy-group # optional: ensure only one action runs at a time
+    steps:
+      - uses: actions/checkout@v3
+      - uses: renderlabs/render-deploy-action@v3
+      - run: |
+            curl -X POST -H "Authorization: Bearer ${{ secrets.RENDER_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{}' \
+            ${{ secrets.RENDER_DEPLOY_HOOK }}
