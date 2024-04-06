@@ -10,8 +10,18 @@ jobs:
     concurrency: deploy-group # optional: ensure only one action runs at a time
     steps:
       - uses: actions/checkout@v3
-      - uses: renderlabs/render-deploy-action@v3
-      - run: |
+      - uses: actions/setup-python@v3
+        with:
+          python-version: 3.8
+        
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      
+      - name: run chatbot
+        run: python chatbot.py
+      
+      - name: deploy to render
+        run: |
             curl -X POST -H "Authorization: Bearer ${{ secrets.RENDER_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d '{}' \
