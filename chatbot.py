@@ -221,6 +221,13 @@ def help_command(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /help is issued."""
     update.message.reply_text('If you want to use other function,send /welcome to explore.')
 
+def test(update: Update, context: CallbackContext):
+    autodeploy_message = '''deployed sucessfully!,my friend
+'''.format(
+        update.message.from_user.first_name)
+    context.bot.send_message(chat_id=update.effective_chat.id,
+                             text=autodeploy_message)
+
 def main() -> None:
     config = configparser.ConfigParser()
     config.read('config.ini')
