@@ -15,14 +15,6 @@ jobs:
         uses: actions/setup-python@v3
         with:
            python-version: 3.11
-        
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-      
-      - name: run chatbot
-        run: python chatbot.py
       
       - name: deploy to render
         run: |
