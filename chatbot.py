@@ -221,7 +221,7 @@ def help_command(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /help is issued."""
     update.message.reply_text('If you want to use other function,send /welcome to explore.')
 
-def test(update: Update, context: CallbackContext):
+def test_command(update: Update, context: CallbackContext):
     autodeploy_message = '''deployed sucessfully!,my friend
 '''.format(
         update.message.from_user.first_name)
@@ -244,6 +244,7 @@ def main() -> None:
     default_handler = MessageHandler(Filters.command, welcome)
     dispatcher.add_handler(CommandHandler("welcome", welcome))
     dispatcher.add_handler(CommandHandler("help", help_command))
+    dispatcher.add_handler(CommandHandler("test", test_command))
     dispatcher.add_handler(hiking_conv_handler())
     dispatcher.add_handler(tv_show_conv_handler())
     dispatcher.add_handler(default_handler)
